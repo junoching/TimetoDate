@@ -3,14 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="light">
+<meta name="color-scheme" content="only light">
 <title>TimetoDate</title>
 <style>
   :root{
     --ink:#16150f; --paper:#fffef9; --line:#e4e0d2; --line-strong:#16150f;
     --teal:#0f766e; --teal-soft:rgba(15,118,110,.12); --muted:#6f6a5c;
     --danger:#b3261e;
-    color-scheme: light;
+    color-scheme: only light;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
   body{margin:0; background:var(--paper); color:var(--ink);
@@ -99,6 +99,17 @@
   .legend .sw{width:16px; height:12px; border:1px solid var(--line);}
   .hidden{display:none !important;}
   @media (max-width:420px){ .slots{grid-template-columns:repeat(3,minmax(0,1fr));} }
+  /* 深色模式環境下亦維持淺色設計（向強制深色工具表明本頁已自行處理） */
+  @media (prefers-color-scheme: dark){
+    body{background:var(--paper); color:var(--ink);}
+    input[type=text],input[type=date],input[type=time],input[type=password],input[inputmode]{background:#fff; color:var(--ink);}
+    .btn{background:#fff; color:var(--ink);}
+    .btn.primary{background:var(--ink); color:#fff;}
+    .btn.teal{background:var(--teal); color:#fff;}
+    .day,.slot,.chip,.panel{background:#fff;}
+    .slot.on{background:var(--teal); color:#fff;}
+    .day.picked{background:var(--teal-soft);}
+  }
 </style>
 </head>
 <body>
