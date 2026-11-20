@@ -99,6 +99,9 @@
   .legend .sw{width:16px; height:12px; border:1px solid var(--line);}
   .hidden{display:none !important;}
   @media (max-width:420px){ .slots{grid-template-columns:repeat(3,minmax(0,1fr));} }
+  /* 窄螢幕：日期／時間改直排，避免 iOS 日期格的最細闊度迫爆雙欄 */
+  @media (max-width:560px){ .grid2{grid-template-columns:1fr;} }
+  html,body{overflow-x:clip;}
   /* 深色模式環境下亦維持淺色設計（向強制深色工具表明本頁已自行處理） */
   @media (prefers-color-scheme: dark){
     body{background:var(--paper); color:var(--ink);}
