@@ -38,7 +38,7 @@
   label.field{display:block; margin:12px 0; min-width:0;}
   label.field span{display:block; font-size:13px; color:var(--muted); margin-bottom:4px;}
   input[type=text],input[type=date],input[type=time],input[type=password],input[inputmode]{
-    width:100%; min-width:0; min-height:44px; padding:9px 10px; font-size:16px;
+    width:100%; min-width:0; max-width:100%; min-height:44px; padding:9px 10px; font-size:16px;
     border:1px solid var(--line-strong); border-radius:2px; background:#fff; color:var(--ink);}
   .grid2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
   .evlist{border-top:1px solid var(--line);}
@@ -102,6 +102,8 @@
   /* 窄螢幕：日期／時間改直排，避免 iOS 日期格的最細闊度迫爆雙欄 */
   @media (max-width:560px){ .grid2{grid-template-columns:1fr;} }
   html,body{overflow-x:clip;}
+  /* iOS 日期／時間格預設外觀有固有闊度、唔跟 width:100%，取消預設外觀先肯收窄 */
+  input[type=date],input[type=time]{-webkit-appearance:none; appearance:none;}
   /* 深色模式環境下亦維持淺色設計（向強制深色工具表明本頁已自行處理） */
   @media (prefers-color-scheme: dark){
     body{background:var(--paper); color:var(--ink);}
