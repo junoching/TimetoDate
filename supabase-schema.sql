@@ -1,4 +1,4 @@
--- 一群人約時間（GitHub 共用版）— Supabase 後端設定
+-- TimetoDate — Supabase 後端設定
 -- 用法：在 Supabase 專案的 SQL Editor 整段貼上，按 Run，一次完成。
 -- 設計：events 表只存公開資料（不含 PIN）；PIN 雜湊獨立存 event_secrets，
 -- 且 anon 角色對 event_secrets 沒有任何權限，只能透過下列兩個
