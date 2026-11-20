@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>一群人約時間 — TimetoDate</title>
+<style>
+  :root{
+    --ink:#16150f; --paper:#fffef9; --line:#e4e0d2; --line-strong:#16150f;
+    --teal:#0f766e; --teal-soft:rgba(15,118,110,.12); --muted:#6f6a5c;
+    --danger:#b3261e;
+  }
+  *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
+  body{margin:0; background:var(--paper); color:var(--ink);
+    font-family:"PingFang HK","PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;
+    font-size:16px; line-height:1.55;}
+  .wrap{max-width:720px; margin:0 auto; padding:20px 16px 72px;}
+  header.top{display:flex; align-items:baseline; justify-content:space-between;
+    border-bottom:2px solid var(--line-strong); padding-bottom:10px; margin-bottom:18px;}
+  header.top .brand{font-size:20px; font-weight:700; letter-spacing:.02em;}
+  header.top .brand small{font-weight:400; color:var(--muted); font-size:12px; margin-left:8px; letter-spacing:.08em;}
+  h2{font-size:17px; margin:26px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--line);}
+  h3{font-size:15px; margin:18px 0 8px;}
+  p.note{color:var(--muted); font-size:13px; margin:6px 0;}
+  a{color:var(--teal);}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    min-height:44px; padding:9px 16px; border:1px solid var(--line-strong);
+    background:#fff; color:var(--ink); font-size:15px; cursor:pointer; border-radius:2px;
+    text-decoration:none; user-select:none;}
+  .btn.primary{background:var(--ink); color:#fff;}
+  .btn.teal{background:var(--teal); border-color:var(--teal); color:#fff;}
+  .btn.small{min-height:38px; padding:5px 12px; font-size:14px;}
+  .btn.danger{border-color:var(--danger); color:var(--danger);}
+  .btn:disabled{opacity:.4; cursor:default;}
+  .btnrow{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;}
+  label.field{display:block; margin:12px 0;}
+  label.field span{display:block; font-size:13px; color:var(--muted); margin-bottom:4px;}
+  input[type=text],input[type=date],input[type=time],input[type=password],input[inputmode]{
+    width:100%; min-height:44px; padding:9px 10px; font-size:16px;
+    border:1px solid var(--line-strong); border-radius:2px; background:#fff; color:var(--ink);}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:10px;}
+  .evlist{border-top:1px solid var(--line);}
+  .evrow{display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:12px 2px; border-bottom:1px solid var(--line); cursor:pointer;}
+  .evrow .t{font-weight:600;}
+  .evrow .m{color:var(--muted); font-size:13px;}
+  .cal-head{display:grid; grid-template-columns:repeat(7,1fr); gap:4px; margin:8px 0 4px;
+    font-size:12px; color:var(--muted); text-align:center;}
+  .cal{display:grid; grid-template-columns:repeat(7,1fr); gap:4px;}
+  .day{position:relative; aspect-ratio:1; border:1px solid var(--line); background:#fff;
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:14px; cursor:pointer; user-select:none; border-radius:2px; padding:2px;}
+  .day .cnt{font-size:10px; color:var(--teal); line-height:1.2;}
+  .day.out{opacity:.28; cursor:default;}
+  .day.picked{border-color:var(--teal); background:var(--teal-soft); font-weight:700;
+    box-shadow:inset 0 0 0 1px var(--teal);}
+  .day.editing{outline:2px solid var(--ink); outline-offset:-2px;}
+  .day .unfilled{font-size:9px; color:var(--danger); line-height:1.1;}
+  .monthtitle{font-weight:700; margin:14px 0 4px;}
+  .slots{display:grid; grid-template-columns:repeat(4,1fr); gap:6px; touch-action:none;}
+  .slot{min-height:44px; border:1px solid var(--line-strong); background:#fff; color:var(--ink);
+    font-size:14px; cursor:pointer; border-radius:2px; user-select:none;}
+  .slot.on{background:var(--teal); border-color:var(--teal); color:#fff; font-weight:700;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;}
+  .chip{border:1px solid var(--line-strong); background:#fff; padding:6px 10px; font-size:13px;
+    cursor:pointer; border-radius:999px; user-select:none;}
+  .chip.on{background:var(--ink); color:#fff;}
+  .chip .unfilled{color:var(--danger); font-size:11px; margin-left:4px;}
+  .chip.on .unfilled{color:#ffb4ab;}
+  .plist{border-top:1px solid var(--line);}
+  .prow{display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:10px 2px; border-bottom:1px solid var(--line); cursor:pointer;}
+  .prow .m{color:var(--muted); font-size:13px; text-align:right;}
+  .heatrow{display:flex; align-items:center; gap:10px; padding:7px 2px;
+    border-bottom:1px solid var(--line); cursor:pointer;}
+  .heatrow .tm{width:52px; font-variant-numeric:tabular-nums;}
+  .heatrow .bar{flex:1; height:14px; background:var(--teal-soft); position:relative;}
+  .heatrow .bar i{position:absolute; inset:0 auto 0 0; background:var(--teal);}
+  .heatrow .n{width:44px; text-align:right; font-size:13px; color:var(--muted);}
+  .heatrow.best .tm{font-weight:700;}
+  .panel{border:1px solid var(--line-strong); padding:14px; margin:14px 0; background:#fff;}
+  .panel h3{margin-top:0;}
+  .names{margin:4px 0 10px;}
+  .names b{display:inline-block; border:1px solid var(--line); padding:3px 10px; margin:0 6px 6px 0;
+    font-weight:500; font-size:14px; border-radius:999px;}
+  .toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(80px);
+    background:var(--ink); color:#fff; padding:11px 18px; font-size:14px; border-radius:2px;
+    opacity:0; transition:all .25s; z-index:60; max-width:92vw; text-align:center;}
+  .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .undo{position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(80px);
+    background:var(--ink); color:#fff; padding:10px 14px; font-size:14px; z-index:61;
+    display:flex; gap:14px; align-items:center; opacity:0; transition:all .25s; border-radius:2px;}
+  .undo.show{opacity:1; transform:translateX(-50%) translateY(0);}
+  .undo button{background:none; border:none; color:#7dd3c8; font-size:14px; cursor:pointer; padding:4px;}
+  .err{color:var(--danger); font-size:14px; margin:8px 0;}
+  .legend{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); margin:8px 0;}
+  .legend .sw{width:16px; height:12px; border:1px solid var(--line);}
+  .hidden{display:none !important;}
+  @media (max-width:420px){ .slots{grid-template-columns:repeat(3,1fr);} }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">一群人約時間<small>TIMETODATE</small></div>
+    <a href="./" class="btn small" id="homeLink">活動列表</a>
+  </header>
+  <main id="app"><p class="note">載入中……</p></main>
+</div>
+<div class="toast" id="toast"></div>
+<div class="undo" id="undoBar"><span id="undoText"></span><button id="undoBtn">復原</button></div>
+
+<script>
+"use strict";
+/* ===== 資料層（Supabase REST）— 日後換後端只需改呢一層 ===== */
+const SB_URL = "https://dqedogwkljuisrhmujlq.supabase.co";
+const SB_KEY = "sb_publishable_WyF9AKX11X1tctmJcd45MQ_xHyRmE3u";
+const API = SB_URL + "/rest/v1";
+async function api(path, opts){
+  opts = opts || {};
+  const res = await fetch(API + path, {
+    method: opts.method || "GET",
+    headers: Object.assign({"apikey": SB_KEY, "Content-Type": "application/json"}, opts.headers || {}),
+    body: opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  const text = await res.text();
+  let data = null;
+  try { data = text ? JSON.parse(text) : null; } catch(e){ data = text; }
+  if (!res.ok) throw new Error((data && data.message) || ("HTTP " + res.status));
+  return data;
+}
+const Store = {
+  listEvents: () => api("/events?select=*&order=created_at.desc"),
+  getEvent: async (id) => (await api("/events?select=*&id=eq." + encodeURIComponent(id)))[0] || null,
+  listResponses: (eventId) => api("/responses?select=name,slots,updated_at&event_id=eq." + encodeURIComponent(eventId) + "&order=updated_at.asc"),
+  countResponses: () => api("/responses?select=event_id"),
+  createEvent: (payload) => api("/rpc/create_event", {method:"POST", body: payload}),
+  upsertResponse: (eventId, name, slots) => api("/responses?on_conflict=event_id,name", {
+    method:"POST",
+    headers: {"Prefer": "resolution=merge-duplicates,return=representation"},
+    body: {event_id: eventId, name: name, slots: slots, updated_at: new Date().toISOString()}
+  }),
+  deleteResponse: (eventId, name) => api("/responses?event_id=eq." + encodeURIComponent(eventId) + "&name=eq." + encodeURIComponent(name), {method:"DELETE"}),
+  deleteEvent: (eventId, pin) => api("/rpc/delete_event", {method:"POST", body:{p_event_id: eventId, p_pin: pin}})
+};
+
+/* ===== 工具 ===== */
+const $ = (sel, el) => (el || document).querySelector(sel);
+const app = $("#app");
+const WD = ["日","一","二","三","四","五","六"];
+function pad(n){ return String(n).padStart(2,"0"); }
+function dstr(d){ return d.getFullYear() + "-" + pad(d.getMonth()+1) + "-" + pad(d.getDate()); }
+function parseD(s){ const p = s.split("-").map(Number); return new Date(p[0], p[1]-1, p[2]); }
+function addDays(s, n){ const d = parseD(s); d.setDate(d.getDate()+n); return dstr(d); }
+function spanDays(a, b){ return Math.round((parseD(b) - parseD(a)) / 86400000); }
+function periodDays(ev){
+  const out = []; const n = spanDays(ev.start_date, ev.end_date);
+  for (let i = 0; i <= n; i++) out.push(addDays(ev.start_date, i));
+  return out;
+}
+function hm(t){ return t.slice(0,5); } // "14:00:00" -> "14:00"
+function daySlots(ev){
+  const out = [];
+  let cur = hm(ev.day_start); const end = hm(ev.day_end);
+  while (cur < end){
+    out.push(cur);
+    let [h, m] = cur.split(":").map(Number);
+    m += 30; if (m >= 60){ h++; m -= 60; }
+    cur = pad(h) + ":" + pad(m);
+  }
+  return out;
+}
+function slotKey(date, time){ return date + "T" + time; }
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function fmtDayLabel(s){
+  const d = parseD(s);
+  return (d.getMonth()+1) + "月" + d.getDate() + "日（" + WD[d.getDay()] + "）";
+}
+let toastTimer = null;
+function toast(msg){
+  const t = $("#toast"); t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => t.classList.remove("show"), 3200);
+}
+let undoTimer = null, undoAction = null;
+function showUndo(text, action){
+  $("#undoText").textContent = text; undoAction = action;
+  const bar = $("#undoBar"); bar.classList.add("show");
+  clearTimeout(undoTimer); undoTimer = setTimeout(() => bar.classList.remove("show"), 8000);
+}
+$("#undoBtn").addEventListener("click", () => {
+  $("#undoBar").classList.remove("show");
+  if (undoAction) undoAction();
+});
+function newSlug(){
+  const chars = "abcdefghjkmnpqrstuvwxyz23456789"; let s = "";
+  for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+
+/* ===== 首頁：建立活動 + 活動列表 ===== */
+async function renderHome(){
+  const today = dstr(new Date());
+  app.innerHTML = `
+    <h2>建立新活動</h2>
+    <label class="field"><span>活動名稱</span>
+      <input type="text" id="fTitle" placeholder="例如：羽毛球"></label>
+    <div class="grid2">
+      <label class="field"><span>開始日期</span>
+        <input type="date" id="fStart" value="${today}"></label>
+      <label class="field"><span>結束日期</span>
+        <input type="date" id="fEnd" value="${addDays(today, 6)}"></label>
+    </div>
+    <div class="btnrow">
+      <button class="btn small" id="qMonth">整個本月</button>
+      <button class="btn small" id="qNext">整個下月</button>
+    </div>
+    <p class="note">時段最長 31 日。</p>
+    <div class="grid2">
+      <label class="field"><span>每日時段開始</span>
+        <input type="time" id="fFrom" value="14:00" step="1800"></label>
+      <label class="field"><span>每日時段結束</span>
+        <input type="time" id="fTo" value="22:00" step="1800"></label>
+    </div>
+    <label class="field"><span>刪除活動 PIN（4 至 6 位數字，刪除活動時需要）</span>
+      <input type="text" id="fPin" inputmode="numeric" maxlength="6" placeholder="例如：2468"></label>
+    <p class="err hidden" id="fErr"></p>
+    <button class="btn primary" id="fCreate" style="width:100%">建立活動</button>
+    <h2>活動列表</h2>
+    <div id="evList"><p class="note">載入中……</p></div>`;
+
+  function setMonth(offset){
+    const now = new Date();
+    const first = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    const last = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0);
+    $("#fStart").value = offset === 0 && dstr(first) < today ? today : dstr(first);
+    $("#fEnd").value = dstr(last);
+  }
+  $("#qMonth").addEventListener("click", () => setMonth(0));
+  $("#qNext").addEventListener("click", () => setMonth(1));
+
+  $("#fCreate").addEventListener("click", async () => {
+    const err = $("#fErr");
+    const showErr = (m) => { err.textContent = m; err.classList.remove("hidden"); };
+    err.classList.add("hidden");
+    const title = $("#fTitle").value.trim();
+    const start = $("#fStart").value, end = $("#fEnd").value;
+    const from = $("#fFrom").value, to = $("#fTo").value;
+    const pin = $("#fPin").value.trim();
+    if (!title) return showErr("請輸入活動名稱。");
+    if (!start || !end || end < start) return showErr("請檢查開始與結束日期。");
+    if (spanDays(start, end) > 30) return showErr("時段最長 31 日，請縮短日期範圍。");
+    if (!from || !to || to <= from) return showErr("每日時段的結束時間須遲於開始時間。");
+    if (!/^[0-9]{4,6}$/.test(pin)) return showErr("PIN 須為 4 至 6 位數字。");
+    const btn = $("#fCreate"); btn.disabled = true; btn.textContent = "建立中……";
+    try {
+      const slug = newSlug();
+      const ok = await Store.createEvent({
+        p_id: slug, p_title: title, p_start: start, p_end: end,
+        p_day_start: from, p_day_end: to, p_pin: pin
+      });
+      if (ok === true){
+        location.href = "./?e=" + slug;
+      } else {
+        showErr("建立失敗，請檢查資料後再試。");
+        btn.disabled = false; btn.textContent = "建立活動";
+      }
+    } catch(e){
+      showErr("建立失敗：" + e.message);
+      btn.disabled = false; btn.textContent = "建立活動";
+    }
+  });
+
+  try {
+    const [events, counts] = await Promise.all([Store.listEvents(), Store.countResponses()]);
+    const cmap = {};
+    counts.forEach(r => { cmap[r.event_id] = (cmap[r.event_id] || 0) + 1; });
+    const list = $("#evList");
+    if (!events.length){
+      list.innerHTML = `<p class="note">尚未有活動。用上面的表格建立第一個活動。</p>`;
+      return;
+    }
+    list.innerHTML = `<div class="evlist">` + events.map(ev => `
+      <div class="evrow" data-id="${esc(ev.id)}">
+        <div><div class="t">${esc(ev.title)}</div>
+        <div class="m">${fmtDayLabel(ev.start_date)} 至 ${fmtDayLabel(ev.end_date)} · 每日 ${hm(ev.day_start)}–${hm(ev.day_end)}</div></div>
+        <div class="m">${cmap[ev.id] || 0} 人已參加</div>
+      </div>`).join("") + `</div>`;
+    list.querySelectorAll(".evrow").forEach(row =>
+      row.addEventListener("click", () => { location.href = "./?e=" + row.dataset.id; }));
+  } catch(e){
+    $("#evList").innerHTML = `<p class="err">載入活動列表失敗：${esc(e.message)}</p>`;
+  }
+}
+
+/* ===== 拖拉上色（全域 pointer 處理） ===== */
+const Paint = {active:false, val:true, slots:null, day:null, dirty:false, onDone:null};
+document.addEventListener("pointermove", (e) => {
+  if (!Paint.active) return;
+  const el = document.elementFromPoint(e.clientX, e.clientY);
+  const b = el && el.closest ? el.closest(".slot") : null;
+  if (b && b.dataset.day === Paint.day){
+    const k = b.dataset.key;
+    if (Paint.val) Paint.slots.add(k); else Paint.slots.delete(k);
+    b.classList.toggle("on", Paint.val);
+    Paint.dirty = true;
+  }
+});
+document.addEventListener("pointerup", () => {
+  if (Paint.active){
+    Paint.active = false;
+    if (Paint.dirty && Paint.onDone) Paint.onDone();
+    Paint.dirty = false;
+  }
+});
+
+/* ===== 活動頁 ===== */
+async function renderEvent(eventId){
+  app.innerHTML = `<p class="note">載入中……</p>`;
+  let ev = null;
+  try { ev = await Store.getEvent(eventId); } catch(e){ /* 視為找不到 */ }
+  if (!ev){
+    app.innerHTML = `<h2>找不到這個活動</h2>
+      <p class="note">連結可能已失效，或活動已被刪除。</p>
+      <p><a href="./">返回活動列表</a></p>`;
+    return;
+  }
+  const days = periodDays(ev);
+  const times = daySlots(ev);
+  let responses = [];
+  try { responses = await Store.listResponses(eventId); }
+  catch(e){ app.innerHTML = `<p class="err">載入回覆失敗：${esc(e.message)}</p>`; return; }
+
+  let myName = localStorage.getItem("ttd_name_" + eventId) || localStorage.getItem("ttd_name") || "";
+  let mySlots = new Set();
+  let picked = new Set();
+  let savedExists = false;
+  let editingDay = null;
+  let selectedDay = null;
+  let selectedSlot = null;
+  let personView = null;
+  let suppressClickAt = 0;
+
+  function loadMine(){
+    mySlots = new Set(); picked = new Set();
+    const mine = responses.find(r => r.name === myName);
+    savedExists = !!mine;
+    if (mine) mine.slots.forEach(k => {
+      if (days.includes(k.split("T")[0]) && times.includes(k.split("T")[1])){
+        mySlots.add(k); picked.add(k.split("T")[0]);
+      }
+    });
+  }
+  loadMine();
+
+  app.innerHTML = `
+    <p style="margin:0 0 4px"><a href="./">← 返回活動列表</a></p>
+    <h2 style="border-bottom:none; margin:6px 0 2px; font-size:20px">${esc(ev.title)}</h2>
+    <p class="note">${fmtDayLabel(ev.start_date)} 至 ${fmtDayLabel(ev.end_date)} · 每日 ${hm(ev.day_start)}–${hm(ev.day_end)} · 每格 30 分鐘</p>
+    <div class="btnrow">
+      <button class="btn small" id="copyLink">複製活動連結</button>
+      <button class="btn small" id="refreshBtn">更新結果</button>
+      <button class="btn small danger" id="delEventBtn">刪除活動</button>
+    </div>
+    <div id="delPanel"></div>
+    <h2>已參加（<span id="pCount">0</span> 人）</h2>
+    <div class="plist" id="pList"></div>
+    <div id="personPanel"></div>
+    <h2>填寫你的時間</h2>
+    <div id="editor"></div>
+    <h2>結果</h2>
+    <div id="results"></div>`;
+
+  $("#copyLink").addEventListener("click", async () => {
+    try { await navigator.clipboard.writeText(location.href); toast("已複製活動連結"); }
+    catch(e){ toast("複製失敗，請直接複製瀏覽器網址"); }
+  });
+  $("#refreshBtn").addEventListener("click", async () => { await refreshData(); toast("已更新"); });
+  $("#delEventBtn").addEventListener("click", () => {
+    const p = $("#delPanel");
+    if (p.innerHTML){ p.innerHTML = ""; return; }
+    p.innerHTML = `<div class="panel">
+      <h3>刪除活動</h3>
+      <p class="note">刪除後，活動及所有回覆會一併移除，不能復原。</p>
+      <label class="field"><span>請輸入建立活動時設定的 PIN</span>
+        <input type="password" id="delPin" inputmode="numeric" maxlength="6"></label>
+      <p class="err hidden" id="delErr"></p>
+      <div class="btnrow">
+        <button class="btn danger" id="delConfirm">確認刪除</button>
+        <button class="btn" id="delCancel">取消</button>
+      </div></div>`;
+    $("#delCancel").addEventListener("click", () => { p.innerHTML = ""; });
+    $("#delConfirm").addEventListener("click", async () => {
+      const pin = $("#delPin").value.trim();
+      const err = $("#delErr");
+      try {
+        const ok = await Store.deleteEvent(eventId, pin);
+        if (ok === true){ toast("活動已刪除"); location.href = "./"; }
+        else { err.textContent = "PIN 不正確，活動未被刪除。"; err.classList.remove("hidden"); }
+      } catch(e){ err.textContent = "刪除失敗：" + e.message; err.classList.remove("hidden"); }
+    });
+  });
+
+  async function refreshData(){
+    try {
+      responses = await Store.listResponses(eventId);
+      renderParticipants(); renderResults();
+    } catch(e){ /* 保持現有畫面 */ }
+  }
+  setInterval(() => { if (!document.hidden) refreshData(); }, 30000);
+
+  /* ---- 已參加名單 ---- */
+  function daysFilled(r){ return new Set(r.slots.map(k => k.split("T")[0])).size; }
+  function renderParticipants(){
+    $("#pCount").textContent = responses.length;
+    const list = $("#pList");
+    if (!responses.length){
+      list.innerHTML = `<p class="note" style="padding:10px 2px">尚未有人參加。在下方填寫你的時間，成為第一位。</p>`;
+      return;
+    }
+    list.innerHTML = responses.map(r => `
+      <div class="prow" data-name="${esc(r.name)}">
+        <div>${esc(r.name)}${r.name === myName ? "（你）" : ""}</div>
+        <div class="m">填了 ${daysFilled(r)} 日 · ${r.slots.length} 個時段</div>
+      </div>`).join("");
+    list.querySelectorAll(".prow").forEach(row =>
+      row.addEventListener("click", () => { personView = row.dataset.name; renderPersonPanel(); }));
+    renderPersonPanel();
+  }
+  function renderPersonPanel(){
+    const box = $("#personPanel");
+    const r = responses.find(x => x.name === personView);
+    if (!personView || !r){ box.innerHTML = ""; return; }
+    const byDay = {};
+    r.slots.forEach(k => {
+      const [d, t] = k.split("T");
+      (byDay[d] = byDay[d] || []).push(t);
+    });
+    const rows = days.filter(d => byDay[d]).map(d =>
+      `<p style="margin:6px 0"><b>${fmtDayLabel(d)}</b>：${byDay[d].sort().join("、")}</p>`).join("");
+    box.innerHTML = `<div class="panel">
+      <h3>${esc(r.name)} 的時間</h3>
+      ${rows || '<p class="note">尚未填寫任何時段。</p>'}
+      <div class="btnrow"><button class="btn small" id="personClose">關閉</button></div>
+    </div>`;
+    $("#personClose").addEventListener("click", () => { personView = null; box.innerHTML = ""; });
+  }
+
+  /* ---- 填寫編輯器 ---- */
+  function monthGroups(){
+    const groups = [];
+    let cur = null;
+    days.forEach(d => {
+      const dt = parseD(d); const key = dt.getFullYear() + "-" + dt.getMonth();
+      if (!cur || cur.key !== key){ cur = {key, title: dt.getFullYear() + " 年 " + (dt.getMonth()+1) + " 月", days: []}; groups.push(cur); }
+      cur.days.push(d);
+    });
+    return groups;
+  }
+  function dayCellHTML(d, mode){
+    const dt = parseD(d);
+    const mine = [...mySlots].filter(k => k.startsWith(d + "T")).length;
+    let sub = "";
+    if (mode === "edit"){
+      if (picked.has(d) && mine === 0) sub = `<span class="unfilled">未填</span>`;
+      else if (mine > 0) sub = `<span class="cnt">${mine} 格</span>`;
+      return `<div class="day ${picked.has(d) ? "picked" : ""} ${editingDay === d ? "editing" : ""}" data-day="${d}">
+        <span>${dt.getDate()}</span>${sub}</div>`;
+    }
+    return "";
+  }
+  function cancelDay(d, silent){
+    const removed = [...mySlots].filter(k => k.startsWith(d + "T"));
+    removed.forEach(k => mySlots.delete(k));
+    picked.delete(d);
+    if (editingDay === d) editingDay = null;
+    renderEditor();
+    if (!silent) showUndo("已取消 " + fmtDayLabel(d), () => {
+      picked.add(d); removed.forEach(k => mySlots.add(k)); renderEditor();
+    });
+  }
+  function renderEditor(){
+    const box = $("#editor");
+    Paint.slots = mySlots; Paint.day = editingDay; Paint.onDone = renderEditor;
+    let html = `
+      <label class="field"><span>你的名字（同名再入可載入並修改自己的回覆）</span>
+        <input type="text" id="myName" placeholder="例如：宋" value="${esc(myName)}"></label>
+      <div class="btnrow"><button class="btn" id="loadMine">載入我的回覆</button></div>`;
+    if (myName){
+      html += `<h3>第一步：選擇日子</h3>
+        <p class="note">點按日子以編輯該日時間；長按已選日子可取消該日（連同該日時間一併清除）。</p>`;
+      monthGroups().forEach(g => {
+        const first = parseD(g.days[0]);
+        const lead = new Date(first.getFullYear(), first.getMonth(), 1).getDay();
+        html += `<div class="monthtitle">${g.title}</div>
+          <div class="cal-head">${WD.map(w => `<div>${w}</div>`).join("")}</div>
+          <div class="cal">`;
+        for (let i = 0; i < lead; i++) html += `<div></div>`;
+        // 補齊該月所有日子（含時段外日子顯示為不可選）
+        const y = first.getFullYear(), m = first.getMonth();
+        const dim = new Date(y, m + 1, 0).getDate();
+        for (let dn = 1; dn <= dim; dn++){
+          const ds = dstr(new Date(y, m, dn));
+          if (days.includes(ds)) html += dayCellHTML(ds, "edit");
+          else html += `<div class="day out"><span>${dn}</span></div>`;
+        }
+        html += `</div>`;
+      });
+      if (picked.size){
+        html += `<div class="chips">` + [...picked].sort().map(d => {
+          const dt = parseD(d);
+          const unfilled = ![...mySlots].some(k => k.startsWith(d + "T"));
+          return `<span class="chip ${editingDay === d ? "on" : ""}" data-chip="${d}">${dt.getMonth()+1}/${dt.getDate()}（${WD[dt.getDay()]}）${unfilled ? '<span class="unfilled">未填</span>' : ""}</span>`;
+        }).join("") + `</div>`;
+      }
+      if (editingDay){
+        const allOn = times.every(t => mySlots.has(slotKey(editingDay, t)));
+        html += `<div class="panel">
+          <h3>第二步：${fmtDayLabel(editingDay)} 的時間</h3>
+          <div class="btnrow">
+            <button class="btn small teal" id="allDayBtn">${allOn ? "全不選" : "全日"}</button>
+            <button class="btn small" id="copyDayBtn">複製此日時間至其他日子</button>
+            <button class="btn small danger" id="clearDayBtn">清除此日</button>
+          </div>
+          <div class="slots">` + times.map(t => {
+            const k = slotKey(editingDay, t);
+            return `<button class="slot ${mySlots.has(k) ? "on" : ""}" data-key="${k}" data-day="${editingDay}">${t}</button>`;
+          }).join("") + `</div>
+          <p class="note">點按格仔選擇時段，亦可按住拖拉連續選擇。</p>
+        </div>`;
+      }
+      html += `<p class="err hidden" id="saveErr"></p>
+        <div class="btnrow">
+          <button class="btn primary" id="saveBtn">儲存我的回覆</button>
+          ${savedExists ? '<button class="btn danger" id="delMineBtn">刪除我的回覆</button>' : ""}
+        </div>
+        <p class="note">儲存後，其他人開啟同一連結即可看到你的回覆。</p>`;
+    }
+    box.innerHTML = html;
+
+    $("#loadMine").addEventListener("click", () => {
+      const n = $("#myName").value.trim();
+      if (!n){ toast("請先輸入名字"); return; }
+      myName = n;
+      localStorage.setItem("ttd_name", n);
+      localStorage.setItem("ttd_name_" + eventId, n);
+      loadMine(); editingDay = null;
+      renderEditor(); renderParticipants();
+      toast(savedExists ? "已載入你的回覆" : "新回覆：請選擇日子與時間");
+    });
+    if (!myName) return;
+
+    box.querySelectorAll(".day[data-day]").forEach(cell => {
+      const d = cell.dataset.day;
+      let timer = null, sx = 0, sy = 0;
+      cell.addEventListener("pointerdown", (e) => {
+        if (!picked.has(d)) return;
+        sx = e.clientX; sy = e.clientY;
+        timer = setTimeout(() => {
+          timer = null;
+          suppressClickAt = Date.now();
+          if (navigator.vibrate) navigator.vibrate(30);
+          cancelDay(d);
+        }, 600);
+      });
+      ["pointerup","pointercancel","pointerleave"].forEach(evName =>
+        cell.addEventListener(evName, () => { if (timer){ clearTimeout(timer); timer = null; } }));
+      cell.addEventListener("pointermove", (e) => {
+        if (timer && Math.hypot(e.clientX - sx, e.clientY - sy) > 10){ clearTimeout(timer); timer = null; }
+      });
+      cell.addEventListener("contextmenu", (e) => e.preventDefault());
+      cell.addEventListener("click", () => {
+        if (Date.now() - suppressClickAt < 500) return;
+        if (!picked.has(d)) picked.add(d);
+        editingDay = d;
+        renderEditor();
+      });
+    });
+    box.querySelectorAll("[data-chip]").forEach(chip =>
+      chip.addEventListener("click", () => { editingDay = chip.dataset.chip; renderEditor(); }));
+
+    if (editingDay){
+      const grid = box.querySelector(".slots");
+      grid.addEventListener("pointerdown", (e) => {
+        const b = e.target.closest(".slot");
+        if (!b) return;
+        e.preventDefault();
+        Paint.active = true;
+        Paint.val = !mySlots.has(b.dataset.key);
+        if (Paint.val) mySlots.add(b.dataset.key); else mySlots.delete(b.dataset.key);
+        b.classList.toggle("on", Paint.val);
+        Paint.dirty = true;
+      });
+      $("#allDayBtn").addEventListener("click", () => {
+        const keys = times.map(t => slotKey(editingDay, t));
+        const allOn = keys.every(k => mySlots.has(k));
+        keys.forEach(k => { if (allOn) mySlots.delete(k); else mySlots.add(k); });
+        renderEditor();
+      });
+      $("#copyDayBtn").addEventListener("click", () => {
+        const targets = [...picked].filter(d => d !== editingDay);
+        if (!targets.length){ toast("尚未選擇其他日子"); return; }
+        const mine = times.filter(t => mySlots.has(slotKey(editingDay, t)));
+        targets.forEach(d => {
+          times.forEach(t => mySlots.delete(slotKey(d, t)));
+          mine.forEach(t => mySlots.add(slotKey(d, t)));
+        });
+        toast("已複製此日時間至 " + targets.length + " 日");
+        renderEditor();
+      });
+      $("#clearDayBtn").addEventListener("click", () => cancelDay(editingDay));
+    }
+    $("#saveBtn").addEventListener("click", async () => {
+      const err = $("#saveErr");
+      err.classList.add("hidden");
+      if (!mySlots.size){
+        err.textContent = "請先選擇至少一個時段。";
+        err.classList.remove("hidden");
+        return;
+      }
+      const btn = $("#saveBtn"); btn.disabled = true; btn.textContent = "儲存中……";
+      try {
+        await Store.upsertResponse(eventId, myName, [...mySlots].sort());
+        savedExists = true;
+        toast("已儲存，其他人開啟連結即可看到");
+        await refreshData();
+        renderEditor();
+      } catch(e){
+        err.textContent = "儲存失敗：" + e.message;
+        err.classList.remove("hidden");
+        btn.disabled = false; btn.textContent = "儲存我的回覆";
+      }
+    });
+    const delMine = $("#delMineBtn");
+    if (delMine) delMine.addEventListener("click", async () => {
+      try {
+        await Store.deleteResponse(eventId, myName);
+        mySlots = new Set(); picked = new Set(); editingDay = null; savedExists = false;
+        if (personView === myName) personView = null;
+        toast("已刪除你的回覆");
+        await refreshData();
+        renderEditor();
+      } catch(e){ toast("刪除失敗：" + e.message); }
+    });
+  }
+
+  /* ---- 結果 ---- */
+  function renderResults(){
+    const box = $("#results");
+    const total = responses.length;
+    if (!total){
+      box.innerHTML = `<p class="note">尚未有人填寫。第一份回覆出現後，這裡會顯示熱力圖。</p>`;
+      return;
+    }
+    const counts = {};
+    responses.forEach(r => r.slots.forEach(k => { counts[k] = (counts[k] || 0) + 1; }));
+    let maxCount = 0;
+    Object.values(counts).forEach(c => { if (c > maxCount) maxCount = c; });
+    const best = Object.keys(counts).filter(k => counts[k] === maxCount).sort().slice(0, 3);
+    let html = `<p><b>最多人有空：</b>` + best.map(k => {
+      const [d, t] = k.split("T");
+      return fmtDayLabel(d) + " " + t + "（" + maxCount + " 人）";
+    }).join("、") + `</p>`;
+    html += `<div class="legend">人數少 <span class="sw" style="background:rgba(15,118,110,.25)"></span>
+      <span class="sw" style="background:rgba(15,118,110,.55)"></span>
+      <span class="sw" style="background:rgba(15,118,110,.9)"></span> 人數多（共 ${total} 人填寫）</div>`;
+    monthGroups().forEach(g => {
+      const first = parseD(g.days[0]);
+      const lead = new Date(first.getFullYear(), first.getMonth(), 1).getDay();
+      html += `<div class="monthtitle">${g.title}</div>
+        <div class="cal-head">${WD.map(w => `<div>${w}</div>`).join("")}</div>
+        <div class="cal">`;
+      for (let i = 0; i < lead; i++) html += `<div></div>`;
+      const y = first.getFullYear(), m = first.getMonth();
+      const dim = new Date(y, m + 1, 0).getDate();
+      for (let dn = 1; dn <= dim; dn++){
+        const ds = dstr(new Date(y, m, dn));
+        if (!days.includes(ds)){ html += `<div class="day out"><span>${dn}</span></div>`; continue; }
+        let dayMax = 0;
+        times.forEach(t => { const c = counts[slotKey(ds, t)] || 0; if (c > dayMax) dayMax = c; });
+        const alpha = dayMax ? (0.15 + 0.75 * (dayMax / total)) : 0;
+        html += `<div class="day rday ${selectedDay === ds ? "editing" : ""}" data-rday="${ds}"
+          style="background:rgba(15,118,110,${alpha.toFixed(2)})">
+          <span>${dn}</span>${dayMax ? `<span class="cnt">${dayMax} 人</span>` : ""}</div>`;
+      }
+      html += `</div>`;
+    });
+    if (selectedDay){
+      html += `<h3>${fmtDayLabel(selectedDay)} 的時段</h3>`;
+      html += times.map(t => {
+        const k = slotKey(selectedDay, t);
+        const c = counts[k] || 0;
+        const pct = total ? Math.round(c / total * 100) : 0;
+        return `<div class="heatrow ${c === maxCount && c > 0 ? "best" : ""}" data-slot="${k}">
+          <div class="tm">${t}</div>
+          <div class="bar"><i style="width:${pct}%"></i></div>
+          <div class="n">${c} 人</div></div>`;
+      }).join("");
+    }
+    if (selectedSlot){
+      const avail = responses.filter(r => r.slots.includes(selectedSlot)).map(r => r.name);
+      const notAvail = responses.filter(r => !r.slots.includes(selectedSlot)).map(r => r.name);
+      const [d, t] = selectedSlot.split("T");
+      html += `<div class="panel">
+        <h3>${fmtDayLabel(d)} ${t}</h3>
+        <p style="margin-bottom:2px"><b>有空（${avail.length} 人）</b></p>
+        <div class="names">${avail.length ? avail.map(n => `<b>${esc(n)}</b>`).join("") : '<span class="note">沒有人</span>'}</div>
+        <p style="margin-bottom:2px"><b>已填寫但未選此時段（${notAvail.length} 人）</b></p>
+        <div class="names">${notAvail.length ? notAvail.map(n => `<b>${esc(n)}</b>`).join("") : '<span class="note">沒有人</span>'}</div>
+      </div>`;
+    }
+    box.innerHTML = html;
+    box.querySelectorAll("[data-rday]").forEach(cell =>
+      cell.addEventListener("click", () => { selectedDay = cell.dataset.rday; selectedSlot = null; renderResults(); }));
+    box.querySelectorAll("[data-slot]").forEach(row =>
+      row.addEventListener("click", () => { selectedSlot = row.dataset.slot; renderResults(); }));
+  }
+
+  renderParticipants();
+  renderEditor();
+  renderResults();
+}
+
+/* ===== 路由 ===== */
+(function(){
+  const id = new URLSearchParams(location.search).get("e");
+  if (id) renderEvent(id); else renderHome();
+})();
+</script>
+</body>
+</html>
