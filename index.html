@@ -3,100 +3,112 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="color-scheme" content="only light">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#201e2e">
 <title>TimetoDate</title>
 <style>
   :root{
-    --ink:#16150f; --paper:#fffef9; --line:#e4e0d2; --line-strong:#16150f;
-    --teal:#0f766e; --teal-soft:rgba(15,118,110,.12); --muted:#6f6a5c;
-    --danger:#b3261e;
-    color-scheme: only light;
+    --bg:#201e2e; --card:#2a283e; --card2:#37344e; --inset:#191726;
+    --ink:#f4f2fb; --muted:#a7a2c2; --line:rgba(255,255,255,.08);
+    --acc:#a78bfa; --acc-bright:#c9b8ff; --acc-soft:rgba(167,139,250,.22); --acc-ink:#231a40;
+    --danger:#f0937f; --danger-soft:rgba(240,147,127,.14);
+    --r-lg:20px; --r-md:14px;
+    color-scheme: dark;
   }
   *{box-sizing:border-box; -webkit-tap-highlight-color:transparent;}
-  body{margin:0; background:var(--paper); color:var(--ink);
+  body{margin:0; background:var(--bg); color:var(--ink);
     font-family:"PingFang HK","PingFang TC","Microsoft JhengHei","Noto Sans TC",system-ui,sans-serif;
-    font-size:16px; line-height:1.55;}
-  .wrap{max-width:720px; margin:0 auto; padding:20px 16px 72px;}
-  header.top{display:flex; align-items:baseline; justify-content:space-between;
-    border-bottom:2px solid var(--line-strong); padding-bottom:10px; margin-bottom:18px;}
-  header.top .brand{font-size:20px; font-weight:700; letter-spacing:.02em;}
-  header.top .brand small{font-weight:400; color:var(--muted); font-size:12px; margin-left:8px; letter-spacing:.08em;}
-  h2{font-size:17px; margin:26px 0 10px; padding-bottom:6px; border-bottom:1px solid var(--line);}
-  h3{font-size:15px; margin:18px 0 8px;}
+    font-size:16px; line-height:1.6;}
+  ::selection{background:var(--acc); color:var(--acc-ink);}
+  .wrap{max-width:720px; margin:0 auto; padding:26px 18px 84px;}
+  header.top{display:flex; align-items:center; justify-content:space-between; margin-bottom:28px;}
+  header.top .brand{display:flex; align-items:center; gap:11px; font-size:21px; font-weight:700; letter-spacing:.01em;}
+  .mark{display:grid; grid-template-columns:1fr 1fr; gap:2.5px; width:19px; height:19px; flex:none;}
+  .mark i{background:var(--acc); border-radius:50% 50% 50% 5px;}
+  .mark i:nth-child(2){opacity:.62;}
+  .mark i:nth-child(3){opacity:.62;}
+  .mark i:nth-child(4){opacity:.38;}
+  h2{font-size:17px; font-weight:700; margin:32px 0 12px;}
+  h3{font-size:15px; font-weight:700; margin:18px 0 8px;}
   p.note{color:var(--muted); font-size:13px; margin:6px 0;}
-  a{color:var(--teal);}
-  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px;
-    min-height:44px; padding:9px 16px; border:1px solid var(--line-strong);
-    background:#fff; color:var(--ink); font-size:15px; cursor:pointer; border-radius:2px;
-    text-decoration:none; user-select:none;}
-  .btn.primary{background:var(--ink); color:#fff;}
-  .btn.teal{background:var(--teal); border-color:var(--teal); color:#fff;}
-  .btn.small{min-height:38px; padding:5px 12px; font-size:14px;}
-  .btn.danger{border-color:var(--danger); color:var(--danger);}
-  .btn:disabled{opacity:.4; cursor:default;}
-  .btnrow{display:flex; flex-wrap:wrap; gap:8px; margin:10px 0;}
-  label.field{display:block; margin:12px 0; min-width:0;}
-  label.field span{display:block; font-size:13px; color:var(--muted); margin-bottom:4px;}
-  input[type=text],input[type=date],input[type=time],input[type=password],input[inputmode]{
-    width:100%; min-width:0; max-width:100%; min-height:44px; padding:9px 10px; font-size:16px;
-    border:1px solid var(--line-strong); border-radius:2px; background:#fff; color:var(--ink);}
-  .grid2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
-  .evlist{border-top:1px solid var(--line);}
-  .evrow{display:flex; justify-content:space-between; align-items:center; gap:10px;
-    padding:12px 2px; border-bottom:1px solid var(--line); cursor:pointer;}
-  .evrow .t{font-weight:600;}
-  .evrow .m{color:var(--muted); font-size:13px;}
-  .cal-head{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px; margin:8px 0 4px;
-    font-size:12px; color:var(--muted); text-align:center;}
-  .cal{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:4px;}
-  .day{position:relative; aspect-ratio:1; border:1px solid var(--line); background:#fff;
-    display:flex; flex-direction:column; align-items:center; justify-content:center;
-    font-size:14px; cursor:pointer; user-select:none; border-radius:2px; padding:2px;}
-  .day .cnt{font-size:10px; color:var(--teal); line-height:1.2;}
-  .day.out{opacity:.28; cursor:default;}
-  .day.picked{border-color:var(--teal); background:var(--teal-soft); font-weight:700;
-    box-shadow:inset 0 0 0 1px var(--teal);}
-  .day.editing{outline:2px solid var(--ink); outline-offset:-2px;}
-  .day .unfilled{font-size:9px; color:var(--danger); line-height:1.1;}
-  .monthtitle{font-weight:700; margin:14px 0 4px;}
-  .slots{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:6px; touch-action:none;}
-  .slot{min-height:44px; border:1px solid var(--line-strong); background:#fff; color:var(--ink);
-    font-size:14px; cursor:pointer; border-radius:2px; user-select:none;}
-  .slot.on{background:var(--teal); border-color:var(--teal); color:#fff; font-weight:700;}
-  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:8px 0;}
-  .chip{border:1px solid var(--line-strong); background:#fff; padding:6px 10px; font-size:13px;
-    cursor:pointer; border-radius:999px; user-select:none;}
-  .chip.on{background:var(--ink); color:#fff;}
-  .chip .unfilled{color:var(--danger); font-size:11px; margin-left:4px;}
-  .chip.on .unfilled{color:#ffb4ab;}
-  .plist{border-top:1px solid var(--line);}
-  .prow{display:flex; justify-content:space-between; align-items:center; gap:10px;
-    padding:10px 2px; border-bottom:1px solid var(--line); cursor:pointer;}
-  .prow .m{color:var(--muted); font-size:13px; text-align:right;}
-  .heatrow{display:flex; align-items:center; gap:10px; padding:7px 2px;
-    border-bottom:1px solid var(--line); cursor:pointer;}
-  .heatrow .tm{width:52px; font-variant-numeric:tabular-nums;}
-  .heatrow .bar{flex:1; height:14px; background:var(--teal-soft); position:relative;}
-  .heatrow .bar i{position:absolute; inset:0 auto 0 0; background:var(--teal);}
-  .heatrow .n{width:44px; text-align:right; font-size:13px; color:var(--muted);}
-  .heatrow.best .tm{font-weight:700;}
-  .panel{border:1px solid var(--line-strong); padding:14px; margin:14px 0; background:#fff;}
+  a{color:var(--acc-bright);}
+  .card,.panel{background:var(--card); border-radius:var(--r-lg); padding:18px; margin:14px 0;}
   .panel h3{margin-top:0;}
+  .btn{display:inline-flex; align-items:center; justify-content:center; gap:6px;
+    min-height:44px; padding:9px 18px; border:none;
+    background:var(--card2); color:var(--ink); font-size:15px; cursor:pointer; border-radius:999px;
+    text-decoration:none; user-select:none;}
+  .btn.primary{background:var(--acc); color:var(--acc-ink); font-weight:700;}
+  .btn.teal{background:var(--acc-soft); color:var(--acc-bright);}
+  .btn.small{min-height:38px; padding:5px 14px; font-size:14px;}
+  .btn.danger{background:var(--danger-soft); color:var(--danger);}
+  .btn:disabled{opacity:.4; cursor:default;}
+  .btnrow{display:flex; flex-wrap:wrap; gap:8px; margin:12px 0;}
+  label.field{display:block; margin:14px 0; min-width:0;}
+  label.field span{display:block; font-size:13px; color:var(--muted); margin-bottom:6px;}
+  input[type=text],input[type=date],input[type=time],input[type=password],input[inputmode]{
+    width:100%; min-width:0; max-width:100%; min-height:48px; padding:10px 14px; font-size:16px;
+    border:1px solid var(--line); border-radius:var(--r-md); background:var(--inset); color:var(--ink);}
+  input:focus{outline:2px solid var(--acc); border-color:transparent;}
+  .grid2{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:10px;}
+  .evlist{display:flex; flex-direction:column; gap:10px;}
+  .evrow{display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:16px; background:var(--card); border-radius:var(--r-lg); cursor:pointer;}
+  .evrow .t{font-weight:700;}
+  .evrow .m{color:var(--muted); font-size:13px;}
+  .cal-head{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px; margin:8px 0 4px;
+    font-size:12px; color:var(--muted); text-align:center;}
+  .cal{display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); gap:6px;}
+  .day{position:relative; aspect-ratio:1; border:none; background:var(--card);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    font-size:14px; cursor:pointer; user-select:none; border-radius:10px; padding:2px;}
+  .day .cnt{font-size:10px; color:var(--acc-bright); line-height:1.2;}
+  .day.out{opacity:.25; cursor:default; background:transparent;}
+  .day.picked{background:var(--acc-soft); font-weight:700;
+    box-shadow:inset 0 0 0 1.5px var(--acc);}
+  .day.editing{outline:2px solid var(--acc-bright); outline-offset:-2px;}
+  .day .unfilled{font-size:9px; color:var(--danger); line-height:1.1;}
+  .monthtitle{font-weight:700; margin:20px 0 6px;}
+  .slots{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; touch-action:none;}
+  .slot{min-height:48px; border:none; background:var(--inset); color:var(--ink);
+    font-size:14px; cursor:pointer; border-radius:12px; user-select:none;}
+  .slot.on{background:var(--acc); color:var(--acc-ink); font-weight:700;}
+  .chips{display:flex; flex-wrap:wrap; gap:6px; margin:10px 0;}
+  .chip{border:none; background:var(--card); color:var(--ink); padding:7px 12px; font-size:13px;
+    cursor:pointer; border-radius:999px; user-select:none;}
+  .chip.on{background:var(--acc); color:var(--acc-ink); font-weight:700;}
+  .chip .unfilled{color:var(--danger); font-size:11px; margin-left:4px;}
+  .chip.on .unfilled{color:var(--acc-ink);}
+  .plist{display:flex; flex-direction:column; gap:10px;}
+  .prow{display:flex; justify-content:space-between; align-items:center; gap:10px;
+    padding:14px 16px; background:var(--card); border-radius:var(--r-lg); cursor:pointer;}
+  .prow .m{color:var(--muted); font-size:13px; text-align:right;}
+  .heatrow{display:flex; align-items:center; gap:10px; padding:8px 2px; cursor:pointer;}
+  .heatrow .tm{width:52px; font-variant-numeric:tabular-nums;}
+  .heatrow .bar{flex:1; height:12px; background:var(--acc-soft); border-radius:999px; position:relative; overflow:hidden;}
+  .heatrow .bar i{position:absolute; inset:0 auto 0 0; background:var(--acc); border-radius:999px;}
+  .heatrow .n{width:44px; text-align:right; font-size:13px; color:var(--muted);}
+  .heatrow.best .tm{font-weight:700; color:var(--acc-bright);}
+  .stat{background:var(--card); border-radius:var(--r-lg); padding:18px; margin:12px 0;}
+  .stat-n{font-size:34px; font-weight:800; line-height:1.1; letter-spacing:-.01em;}
+  .stat-t{color:var(--muted); font-size:13px; margin-top:4px;}
   .names{margin:4px 0 10px;}
-  .names b{display:inline-block; border:1px solid var(--line); padding:3px 10px; margin:0 6px 6px 0;
+  .names b{display:inline-block; background:var(--card2); padding:4px 12px; margin:0 6px 6px 0;
     font-weight:500; font-size:14px; border-radius:999px;}
   .toast{position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(80px);
-    background:var(--ink); color:#fff; padding:11px 18px; font-size:14px; border-radius:2px;
+    background:var(--card2); color:var(--ink); padding:11px 18px; font-size:14px; border-radius:14px;
+    box-shadow:0 10px 30px rgba(0,0,0,.4);
     opacity:0; transition:all .25s; z-index:60; max-width:92vw; text-align:center;}
   .toast.show{opacity:1; transform:translateX(-50%) translateY(0);}
   .undo{position:fixed; left:50%; bottom:22px; transform:translateX(-50%) translateY(80px);
-    background:var(--ink); color:#fff; padding:10px 14px; font-size:14px; z-index:61;
-    display:flex; gap:14px; align-items:center; opacity:0; transition:all .25s; border-radius:2px;}
+    background:var(--card2); color:var(--ink); padding:10px 14px; font-size:14px; z-index:61;
+    border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.4);
+    display:flex; gap:14px; align-items:center; opacity:0; transition:all .25s;}
   .undo.show{opacity:1; transform:translateX(-50%) translateY(0);}
-  .undo button{background:none; border:none; color:#7dd3c8; font-size:14px; cursor:pointer; padding:4px;}
+  .undo button{background:none; border:none; color:var(--acc-bright); font-size:14px; cursor:pointer; padding:4px;}
   .err{color:var(--danger); font-size:14px; margin:8px 0;}
-  .legend{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); margin:8px 0;}
-  .legend .sw{width:16px; height:12px; border:1px solid var(--line);}
+  .legend{display:flex; align-items:center; gap:6px; font-size:12px; color:var(--muted); margin:10px 0;}
+  .legend .sw{width:16px; height:12px; border:none; border-radius:3px;}
   .hidden{display:none !important;}
   @media (max-width:420px){ .slots{grid-template-columns:repeat(3,minmax(0,1fr));} }
   /* 窄螢幕：日期／時間改直排，避免 iOS 日期格的最細闊度迫爆雙欄 */
@@ -104,23 +116,12 @@
   html,body{overflow-x:clip;}
   /* iOS 日期／時間格預設外觀有固有闊度、唔跟 width:100%，取消預設外觀先肯收窄 */
   input[type=date],input[type=time]{-webkit-appearance:none; appearance:none;}
-  /* 深色模式環境下亦維持淺色設計（向強制深色工具表明本頁已自行處理） */
-  @media (prefers-color-scheme: dark){
-    body{background:var(--paper); color:var(--ink);}
-    input[type=text],input[type=date],input[type=time],input[type=password],input[inputmode]{background:#fff; color:var(--ink);}
-    .btn{background:#fff; color:var(--ink);}
-    .btn.primary{background:var(--ink); color:#fff;}
-    .btn.teal{background:var(--teal); color:#fff;}
-    .day,.slot,.chip,.panel{background:#fff;}
-    .slot.on{background:var(--teal); color:#fff;}
-    .day.picked{background:var(--teal-soft);}
-  }
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="brand">TimetoDate</div>
+    <div class="brand"><span class="mark"><i></i><i></i><i></i><i></i></span>TimetoDate</div>
     <a href="./" class="btn small" id="homeLink">活動列表</a>
   </header>
   <main id="app"><p class="note">載入中……</p></main>
@@ -220,6 +221,7 @@ async function renderHome(){
   const today = dstr(new Date());
   app.innerHTML = `
     <h2>建立新活動</h2>
+    <div class="card">
     <label class="field"><span>活動名稱</span>
       <input type="text" id="fTitle" placeholder="例如：羽毛球"></label>
     <div class="grid2">
@@ -243,6 +245,7 @@ async function renderHome(){
       <input type="text" id="fPin" inputmode="numeric" maxlength="6" placeholder="例如：2468"></label>
     <p class="err hidden" id="fErr"></p>
     <button class="btn primary" id="fCreate" style="width:100%">建立活動</button>
+    </div>
     <h2>活動列表</h2>
     <div id="evList"><p class="note">載入中……</p></div>`;
 
@@ -674,13 +677,13 @@ async function renderEvent(eventId){
     let maxCount = 0;
     Object.values(counts).forEach(c => { if (c > maxCount) maxCount = c; });
     const best = Object.keys(counts).filter(k => counts[k] === maxCount).sort().slice(0, 3);
-    let html = `<p><b>最多人有空：</b>` + best.map(k => {
+    let html = `<div class="stat"><div class="stat-n">${maxCount} 人</div><div class="stat-t">最多人有空 · ` + best.map(k => {
       const [d, t] = k.split("T");
-      return fmtDayLabel(d) + " " + t + "（" + maxCount + " 人）";
-    }).join("、") + `</p>`;
-    html += `<div class="legend">人數少 <span class="sw" style="background:rgba(15,118,110,.25)"></span>
-      <span class="sw" style="background:rgba(15,118,110,.55)"></span>
-      <span class="sw" style="background:rgba(15,118,110,.9)"></span> 人數多（共 ${total} 人填寫）</div>`;
+      return fmtDayLabel(d) + " " + t;
+    }).join("、") + `</div></div>`;
+    html += `<div class="legend">人數少 <span class="sw" style="background:rgba(167,139,250,.25)"></span>
+      <span class="sw" style="background:rgba(167,139,250,.55)"></span>
+      <span class="sw" style="background:rgba(167,139,250,.9)"></span> 人數多（共 ${total} 人填寫）</div>`;
     monthGroups().forEach(g => {
       const first = parseD(g.days[0]);
       const lead = new Date(first.getFullYear(), first.getMonth(), 1).getDay();
@@ -697,7 +700,7 @@ async function renderEvent(eventId){
         times.forEach(t => { const c = counts[slotKey(ds, t)] || 0; if (c > dayMax) dayMax = c; });
         const alpha = dayMax ? (0.15 + 0.75 * (dayMax / total)) : 0;
         html += `<div class="day rday ${selectedDay === ds ? "editing" : ""}" data-rday="${ds}"
-          style="background:rgba(15,118,110,${alpha.toFixed(2)})">
+          style="background:rgba(167,139,250,${alpha.toFixed(2)})">
           <span>${dn}</span>${dayMax ? `<span class="cnt">${dayMax} 人</span>` : ""}</div>`;
       }
       html += `</div>`;
